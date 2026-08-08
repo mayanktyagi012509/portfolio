@@ -824,6 +824,32 @@
     margin-left: 0;
   }
   
+  .contact-result {
+    display: none;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    border-radius: 16px;
+    background: rgba(45, 184, 168, 0.14);
+    border: 1px solid rgba(45, 184, 168, 0.25);
+    color: #0f3f34;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .contact-result.success {
+    display: block;
+    background: rgba(34, 197, 94, 0.16);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #166534;
+  }
+
+  .contact-result.error {
+    display: block;
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #991b1b;
+  }
 
   @keyframes floatIcon {
     0%, 100% { transform: translateY(0px); }
@@ -1155,7 +1181,7 @@
 
     <div class="project-card">
       <span class="project-tag">Hardware</span>
-      <h3>Zone Detection Unit</h3>
+      <h3>Google Zone Detection Unit</h3>
       <p class="project-company">InVue</p>
       <ul>
         <li>Conducted comprehensive hardware validation and stress testing on physical security solutions</li>
@@ -1166,8 +1192,9 @@
     </div>
 
     <div class="project-card">
-      <span class="project-tag">Web</span>
+      <span class="project-tag">WebSite</span>
       <h3>FCHS Web Portal</h3>
+      <p class="project-company">Forever Cheese</p>
       <ul>
         <li>Built comprehensive automated test scripts using Playwright and Cypress frameworks</li>
         <li>Achieved 99.9% cross-browser compatibility across Chrome, Firefox, and Safari</li>
@@ -1177,8 +1204,9 @@
     </div>
 
     <div class="project-card">
-      <span class="project-tag">Mobile & API</span>
-      <h3>InVue Security</h3>
+      <span class="project-tag">Mobile App & Web Portal</span>
+      <h3>Live Access - InVue Security Products</h3>
+      <p class="project-company">InVue</p>
       <ul>
         <li>Shipped 500+ comprehensive test cases across Android and iOS platforms</li>
         <li>Covered security-critical access-control flows achieving zero P0/P1 defects at UAT</li>
@@ -1188,8 +1216,8 @@
     </div>
 
     <div class="project-card">
-      <span class="project-tag">HR Systems</span>
-      <h3>HRMS Platform</h3>
+      <span class="project-tag">Web Application</span>
+      <h3>HRMS System</h3>
       <p class="project-company">Wingman Partners</p>
       <ul>
         <li>Led QA for internal HRMS project managing team of 3 engineers</li>
@@ -1202,6 +1230,7 @@
     <div class="project-card">
       <span class="project-tag">Mobile App</span>
       <h3>Qu-Free Mobile App</h3>
+      <p class="project-company">Wingman Partners</p>
       <ul>
         <li>Wrote and executed 350+ end-to-end and regression test cases across platforms</li>
         <li>Comprehensive testing across Android and iOS with proactive defect tracking</li>
@@ -1379,8 +1408,8 @@
         <input type="hidden" name="_captcha" value="true">
         <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
 
-        <div class="form-status" id="formStatus"></div>
-        
+        <div class="contact-result" id="contactResult"></div>
+
         <div class="form-group">
           <label for="name">Name *</label>
           <input type="text" id="name" name="name" required placeholder="Your name">
@@ -1474,15 +1503,15 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('contactForm');
-    const status = document.getElementById('formStatus');
+    const result = document.getElementById('contactResult');
 
-    if (!form || !status) return;
+    if (!form || !result) return;
 
     form.addEventListener('submit', function(event) {
       event.preventDefault();
-      status.className = 'form-status';
-      status.style.display = 'block';
-      status.textContent = 'Sending message...';
+      result.className = 'contact-result';
+      result.textContent = 'Sending message...';
+      result.style.display = 'block';
 
       const formData = new FormData(form);
 
@@ -1496,26 +1525,28 @@
       .then(response => response.json().then(data => ({ ok: response.ok, data })))
       .then(({ ok, data }) => {
         if (ok) {
-          status.className = 'form-status success';
-          status.textContent = '✓ Message sent successfully! I will reply soon.';
           form.reset();
+          showResult('Thank you for contacting me! I will reply soon. 😊', true);
         } else {
-          throw new Error(data.error || 'Submission failed.');
+          const errorMessage = data?.error || 'Submission failed. Please try again.';
+          showResult(errorMessage, false);
+          throw new Error(errorMessage);
         }
       })
       .catch(error => {
-        status.className = 'form-status error';
-        status.textContent = '✗ Submission failed. Please try again or email me directly.';
         console.error('Contact form error:', error);
-      })
-      .finally(() => {
-        setTimeout(() => {
-          status.className = 'form-status';
-          status.style.display = 'none';
-          status.textContent = '';
-        }, 7000);
+        showResult('Submission failed. Please try again or email me directly.', false);
       });
     });
+
+    function showResult(message, success) {
+      result.textContent = message;
+      result.className = 'contact-result ' + (success ? 'success' : 'error');
+      result.style.display = 'block';
+      setTimeout(() => {
+        result.style.display = 'none';
+      }, 3000);
+    }
   });
 </script>
 
