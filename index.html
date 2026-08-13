@@ -1105,29 +1105,49 @@
       transition: transform 0.25s ease, opacity 0.25s ease;
     }
 
-    /* Hide the menu by default on mobile and show when nav has .nav-open */
+/* Hide the menu by default on mobile and show as a dropdown panel anchored right */
     .nav-links {
       position: fixed;
       top: 64px;
-      left: 0;
-      right: 0;
+      right: 16px;
+      left: auto;
+      width: 220px;
+      max-width: calc(100vw - 32px);
       background: rgba(255,255,255,0.98);
+      backdrop-filter: blur(10px);
       flex-direction: column;
       gap: 0;
-      padding: 8px 16px;
+      padding: 8px;
       display: none;
       list-style: none;
       z-index: 999;
-      border-bottom: 1px solid rgba(224,224,224,0.5);
-      box-shadow: 0 6px 30px rgba(0,0,0,0.06);
+      border-radius: 12px;
+      border: 1px solid rgba(224,224,224,0.6);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
 
     .nav-links li { width: 100%; }
-    .nav-links li + li { border-top: 1px solid rgba(224,224,224,0.06); }
-    .nav-links a { display: block; padding: 14px 8px; text-align: center; }
+    .nav-links li + li { border-top: 1px solid rgba(224,224,224,0.5); }
+    .nav-links a {
+      display: block;
+      padding: 12px 14px;
+      text-align: right;
+      border-radius: 8px;
+    }
+    .nav-links a:hover {
+      background: rgba(26,155,142,0.08);
+      transform: none;
+    }
 
-    nav.nav-open .nav-links { display: flex; }
-
+    nav.nav-open .nav-links {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+   
     /* toggle animation: transform hamburger to X */
     nav.nav-open .nav-toggle .bar:nth-child(1) { transform: translateY(5px) rotate(45deg); }
     nav.nav-open .nav-toggle .bar:nth-child(2) { opacity: 0; }
@@ -1732,7 +1752,13 @@
     const navLinks = document.querySelector('.nav-links');
     if (!nav || !toggle) return;
 
-    toggle.addEventListener('click', function() {
+    function closeMenu() {
+      nav.classList.remove('nav-open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    toggle.addEventListener('click', function(e) {
+      e.stopPropagation();
       const opened = nav.classList.toggle('nav-open');
       toggle.setAttribute('aria-expanded', opened ? 'true' : 'false');
     });
@@ -1741,18 +1767,26 @@
     if (navLinks) {
       navLinks.addEventListener('click', function(e) {
         if (e.target && e.target.tagName === 'A') {
-          nav.classList.remove('nav-open');
-          toggle.setAttribute('aria-expanded', 'false');
+          closeMenu();
         }
       });
     }
 
+    // Close when clicking/tapping anywhere outside the nav
+    document.addEventListener('click', function(e) {
+      if (nav.classList.contains('nav-open') && !nav.contains(e.target)) {
+        closeMenu();
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeMenu();
+    });
+
     // Ensure menu is closed when resizing to desktop
     window.addEventListener('resize', function() {
-      if (window.innerWidth > 768) {
-        nav.classList.remove('nav-open');
-        toggle.setAttribute('aria-expanded', 'false');
-      }
+      if (window.innerWidth > 768) closeMenu();
     });
   });
 </script>
